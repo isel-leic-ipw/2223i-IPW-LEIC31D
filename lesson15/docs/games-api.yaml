@@ -1,0 +1,282 @@
+openapi: 3.0.1
+info:
+  title: Games API
+  description: This is a simple Games API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - description: Localhost server for testing API
+    url: http://localhost:1904/api
+
+tags:
+- name: games
+- name: users
+
+paths:
+  /users:
+    post:
+      tags:
+      - users
+      summary: adds a user
+      description: Adds a user to the system
+      operationId: addUser
+      requestBody:
+        description: User to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+        required: false
+      responses:
+        201:
+          description: user created
+          content:
+            application/json:
+              schema:
+                required:
+                - token
+                type: object
+                properties:
+                  token:
+                    type: string
+                    format: uuid
+        400:
+          description: Invalid input, object invalid
+          content: {}
+      x-codegen-request-body-name: user
+  /games:
+    get:
+      tags:
+      - games
+      summary: get games
+      description: By passing in the appropriate options, you can search for available
+        games
+      operationId: getGames
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: searchString
+        in: query
+        description: pass an optional search string for looking up games with that  text
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: number of records to skip for pagination
+        schema:
+          minimum: 0
+          type: integer
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+      responses:
+        200:
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+        400:
+          description: bad input parameter
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidRequest'
+    post:
+      tags:
+      - games
+      summary: adds a game
+      description: Adds a game to the system
+      operationId: addGame
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Game to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGame'
+        required: false
+      responses:
+        201:
+          description: Game created
+          content: {}
+        400:
+          description: Invalid input, object invalid
+          content: {}
+      x-codegen-request-body-name: game
+  /games/{gameId}:
+    get:
+      tags:
+      - games
+      summary: Get a game given its id
+      description: Get a game given its id
+      operationId: getGameById
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+          format: uuid
+      - name: gameId
+        in: path
+        description: ID of game that to be fetched
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        400:
+          description: Invalid ID supplied
+          content: 
+            application/json:
+              schema: 
+                type: string
+                example: Invalid ID supplied
+        404:
+          description: Game not found
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/InvalidRequest'
+                example: Game Not found
+    put:
+      tags:
+      - games
+      summary: updates a game
+      description: Updates a Game in the system
+      operationId: updateGame
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: gameId
+        in: path
+        description: ID of the game to be deleted
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Game to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGame'
+        required: false
+      responses:
+        201:
+          description: game updated
+          content: {}
+        404:
+          description: Game not found
+          content: {}
+    delete:
+      tags:
+      - games
+      summary: Delete a game by ID
+      description: Delete a game by ID
+      operationId: deleteGame
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: gameId
+        in: path
+        description: ID of the game to be deleted
+        required: true
+        schema:
+          type: integer
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Game not found
+          content: {}
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+  schemas:
+    Game:
+      required:
+      - id
+      - text
+      - userId
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Fifa
+        description:
+          type: string
+          example: Fifa game description
+        userId:
+          type: integer
+    NewGame:
+      required:
+      - name
+      - userId
+      type: object
+      properties:
+        name:
+          type: string
+          example: Fifa
+        description:
+          type: string
+          example: Fifa game description
+        userId:
+          type: integer
+    NewUser:
+      required:
+      - userName
+      type: object
+      properties:
+        userName:
+          type: string
+          example: joao
+    InvalidRequest:
+      type: object
+      properties:
+        cause:
+          type: string
+          example: "Missing required parameter"
