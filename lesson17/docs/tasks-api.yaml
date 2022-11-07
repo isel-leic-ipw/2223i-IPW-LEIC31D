@@ -1,0 +1,297 @@
+openapi: 3.0.1
+info:
+  title: Tasks API
+  description: This is a simple Tasks API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - description: Localhost server for testing API
+    url: http://localhost:1904/
+
+tags:
+- name: Tasks
+- name: Users
+
+paths:
+  /users:
+    post:
+      tags:
+      - users
+      summary: adds a user
+      description: Adds a user to the system
+      operationId: addUser
+      requestBody:
+        description: User to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+        required: false
+      responses:
+        201:
+          description: user created
+          content:
+            application/json:
+              schema:
+                required:
+                - token
+                type: object
+                properties:
+                  token:
+                    type: string
+                    format: uuid
+        400:
+          description: Invalid input, object invalid
+          content: {}
+      x-codegen-request-body-name: user
+  /tasks:
+    get:
+      tags:
+      - Tasks
+      summary: get Tasks
+      description: By passing in the appropriate options, you can search for available
+        Tasks
+      operationId: getTasks
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: q
+        in: query
+        description: pass an optional search string for looking up Tasks with that  text
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: number of records to skip for pagination
+        schema:
+          minimum: 0
+          type: integer
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+      responses:
+        200:
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        400:
+          description: bad input parameter
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidRequest'
+    post:
+      tags:
+      - Tasks
+      summary: adds a task
+      description: Adds a task to the system
+      operationId: addTask
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Task to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTask'
+        required: false
+      responses:
+        201:
+          description: Task created
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewTaskCreated'
+        400:
+          description: Invalid input, object invalid
+          content: {}
+  /tasks/{taskId}:
+    get:
+      tags:
+      - Tasks
+      summary: Get a task given its id
+      description: Get a task given its id
+      operationId: getTaskById
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+          format: uuid
+      - name: taskId
+        in: path
+        description: ID of task that to be fetched
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: Invalid ID supplied
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/InvalidRequest'
+                example: Invalid ID supplied
+        404:
+          description: Task not found
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/InvalidRequest'
+                example: Task Not found
+    put:
+      tags:
+      - Tasks
+      summary: updates a task
+      description: Updates a Task in the system
+      operationId: updateTask
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: taskId
+        in: path
+        description: ID of the task to be deleted
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Task to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTask'
+        required: false
+      responses:
+        201:
+          description: task updated
+          content: {}
+        404:
+          description: Task not found
+          content: {}
+    delete:
+      tags:
+      - Tasks
+      summary: Delete a task by ID
+      description: Delete a task by ID
+      operationId: deleteTask
+      security:
+        - bearerAuth: []
+      parameters:
+      - name: taskId
+        in: path
+        description: ID of the task to be deleted
+        required: true
+        schema:
+          type: integer
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Task not found
+          content: {}
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+  schemas:
+    Task:
+      required:
+      - id
+      - title
+      - userId
+      
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Study HTTP
+        description:
+          type: string
+          example: Task description
+        userId:
+          type: integer
+    NewTask:
+      required:
+      - title
+      - description
+      - userId
+      type: object
+      properties:
+        title:
+          type: string
+          example: Study Http
+        description:
+          type: string
+          example: Task description
+        userId:
+          type: integer
+    NewUser:
+      required:
+      - userName
+      type: object
+      properties:
+        userName:
+          type: string
+          example: joao
+    InvalidRequest:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Missing required parameter"
+    NewTaskCreated:
+      required:
+      - status
+      - task
+      type: object
+      properties:
+        status:
+          type: string
+          example: Task with id 123 created with success
+        task:
+          $ref: '#/components/schemas/Task'
