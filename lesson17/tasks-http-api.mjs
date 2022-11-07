@@ -6,18 +6,23 @@
 
 import * as tasksServices from './tasks-services.mjs'
 
+export const getTasks = verifyAuthentication(getTasksInternal)
+export const getTask = verifyAuthentication(getTaskInternal)
+export const deleteTask = verifyAuthentication(deleteTaskInternal)
+export const updateTask = verifyAuthentication(updateTaskInternal )
+export const createTask = verifyAuthentication(createTaskInternal )
 
-export async function getTasks(req, rsp) {
-    const userId = req.get("Authorization").split(" ")[1]
-    const tasks = await tasksServices.getTasks(userId)
+
+async function getTasksInternal(req, rsp) {
+    const tasks = await tasksServices.getTasks(req.token)
     rsp.json(tasks)
 }
 
-export async function getTask(req, rsp) {
+async function getTaskInternal(req, rsp) {
     getTaskAndAct(req.params.id, rsp, task => rsp.json(task))
 }
 
-export async function deleteTask(req, rsp) {
+async function deleteTaskInternal(req, rsp) {
     const taskId = req.params.id
     const deleted = await tasksServices.deleteTask(taskId)
     if(deleted) {
@@ -27,7 +32,7 @@ export async function deleteTask(req, rsp) {
     }
 }
 
-export async function createTask(req, rsp) {
+async function createTaskInternal(req, rsp) {
     try {
         let newTask = await tasksServices.createTask(req.body)
         rsp
@@ -44,7 +49,7 @@ export async function createTask(req, rsp) {
         }
 }
 
-export async function updateTask(req, rsp) {
+async function updateTaskInternal(req, rsp) {
     getTaskAndAct(req.params.id, rsp, update)
 
     function update(task) {
@@ -63,4 +68,22 @@ async function getTaskAndAct(taskId, rsp, action) {
         rsp.status(404).json({error: `Task with id ${taskId} not found`})
     }
 }
+
+function verifyAuthentication(handlerFunction) {
+    return function(req, rsp) {
+        let userToken = req.get("Authorization")
+        userToken = userToken ? userToken.split(" ")[1] : null
+        if(!userToken) {
+            return rsp
+                    .status(401)
+                    .json({error: `User token must be provided`})
+            
+        }
+        req.token = userToken 
+        handlerFunction(req, rsp)
+    
+    }
+    
+}
+
 
