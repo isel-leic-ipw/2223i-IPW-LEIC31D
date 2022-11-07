@@ -3,12 +3,14 @@
 
 import express from 'express'
 import * as api from './tasks-http-api.mjs'
+import cors from 'cors'
 
 const PORT = 1904
 
 console.log("Start setting up server")
 let app = express()
 
+app.use(cors())
 app.use(express.json())
 
 app.get('/tasks', api.getTasks)

@@ -1,4 +1,4 @@
-// Module that contains the functions that handle all HTTP APi requests
+// Module contains all task management logic
 
 import * as tasksData from './tasks-data.mjs'
 

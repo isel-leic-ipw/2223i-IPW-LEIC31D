@@ -1,4 +1,5 @@
-// Module that contains the functions that handle all HTTP APi requests
+// Module manages application data.
+// In this specific module, data is stored in memory
 
 const NUM_TASKS = 3
 

@@ -1,10 +1,15 @@
-// Module that contains the functions that handle all HTTP APi requests
+// Module that contains the functions that handle all HTTP APi requests.
+// Handle HTTP request means:
+//  - Obtain data from requests. Request data can be obtained from: URI(path, query, fragment), headers, body
+//  - Invoque the corresponding operation on services
+//  - Generate the response
 
 import * as tasksServices from './tasks-services.mjs'
 
 
 export async function getTasks(req, rsp) {
-    const tasks = await tasksServices.getTasks()
+    const userId = req.get("Authorization").split(" ")[1]
+    const tasks = await tasksServices.getTasks(userId)
     rsp.json(tasks)
 }
 

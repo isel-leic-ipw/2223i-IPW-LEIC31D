@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: Games API
-  description: This is a simple Games API
+  title: Tasks API
+  description: This is a simple Tasks API
   contact:
     email: you@your-company.com
   license:
@@ -10,11 +10,11 @@ info:
   version: 1.0.0
 servers:
   - description: Localhost server for testing API
-    url: http://localhost:1904/api
+    url: http://localhost:1904/
 
 tags:
-- name: games
-- name: users
+- name: Tasks
+- name: Users
 
 paths:
   /users:
@@ -48,14 +48,14 @@ paths:
           description: Invalid input, object invalid
           content: {}
       x-codegen-request-body-name: user
-  /games:
+  /tasks:
     get:
       tags:
-      - games
-      summary: get games
+      - Tasks
+      summary: get Tasks
       description: By passing in the appropriate options, you can search for available
-        games
-      operationId: getGames
+        Tasks
+      operationId: getTasks
       security:
         - bearerAuth: []
       parameters:
@@ -65,9 +65,9 @@ paths:
         schema:
           type: string
           format: uuid
-      - name: searchString
+      - name: q
         in: query
-        description: pass an optional search string for looking up games with that  text
+        description: pass an optional search string for looking up Tasks with that  text
         schema:
           type: string
       - name: skip
@@ -91,7 +91,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Game'
+                  $ref: '#/components/schemas/Task'
         400:
           description: bad input parameter
           content: 
@@ -100,10 +100,10 @@ paths:
                 $ref: '#/components/schemas/InvalidRequest'
     post:
       tags:
-      - games
-      summary: adds a game
-      description: Adds a game to the system
-      operationId: addGame
+      - Tasks
+      summary: adds a task
+      description: Adds a task to the system
+      operationId: addTask
       security:
         - bearerAuth: []
       parameters:
@@ -114,27 +114,29 @@ paths:
           type: string
           format: uuid
       requestBody:
-        description: Game to add
+        description: Task to add
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewGame'
+              $ref: '#/components/schemas/NewTask'
         required: false
       responses:
         201:
-          description: Game created
-          content: {}
+          description: Task created
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewTaskCreated'
         400:
           description: Invalid input, object invalid
           content: {}
-      x-codegen-request-body-name: game
-  /games/{gameId}:
+  /tasks/{taskId}:
     get:
       tags:
-      - games
-      summary: Get a game given its id
-      description: Get a game given its id
-      operationId: getGameById
+      - Tasks
+      summary: Get a task given its id
+      description: Get a task given its id
+      operationId: getTaskById
       security:
         - bearerAuth: []
       parameters:
@@ -143,40 +145,40 @@ paths:
         schema:
           type: string
           format: uuid
-      - name: gameId
+      - name: taskId
         in: path
-        description: ID of game that to be fetched
+        description: ID of task that to be fetched
         required: true
         schema:
           type: integer
-          minimum: 1
+          minimum: 0
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Game'
+                $ref: '#/components/schemas/Task'
         400:
           description: Invalid ID supplied
           content: 
             application/json:
               schema: 
-                type: string
+                $ref: '#/components/schemas/InvalidRequest'
                 example: Invalid ID supplied
         404:
-          description: Game not found
+          description: Task not found
           content: 
             application/json:
               schema: 
                 $ref: '#/components/schemas/InvalidRequest'
-                example: Game Not found
+                example: Task Not found
     put:
       tags:
-      - games
-      summary: updates a game
-      description: Updates a Game in the system
-      operationId: updateGame
+      - Tasks
+      summary: updates a task
+      description: Updates a Task in the system
+      operationId: updateTask
       security:
         - bearerAuth: []
       parameters:
@@ -186,38 +188,38 @@ paths:
         schema:
           type: string
           format: uuid
-      - name: gameId
+      - name: taskId
         in: path
-        description: ID of the game to be deleted
+        description: ID of the task to be deleted
         required: true
         schema:
           type: integer
       requestBody:
-        description: Game to add
+        description: Task to add
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewGame'
+              $ref: '#/components/schemas/NewTask'
         required: false
       responses:
         201:
-          description: game updated
+          description: task updated
           content: {}
         404:
-          description: Game not found
+          description: Task not found
           content: {}
     delete:
       tags:
-      - games
-      summary: Delete a game by ID
-      description: Delete a game by ID
-      operationId: deleteGame
+      - Tasks
+      summary: Delete a task by ID
+      description: Delete a task by ID
+      operationId: deleteTask
       security:
         - bearerAuth: []
       parameters:
-      - name: gameId
+      - name: taskId
         in: path
-        description: ID of the game to be deleted
+        description: ID of the task to be deleted
         required: true
         schema:
           type: integer
@@ -226,7 +228,7 @@ paths:
           description: Invalid ID supplied
           content: {}
         404:
-          description: Game not found
+          description: Task not found
           content: {}
 components:
   securitySchemes:
@@ -234,36 +236,38 @@ components:
       type: http
       scheme: bearer
   schemas:
-    Game:
+    Task:
       required:
       - id
-      - text
+      - title
       - userId
+      
       type: object
       properties:
         id:
           type: integer
           example: 1
-        name:
+        title:
           type: string
-          example: Fifa
+          example: Study HTTP
         description:
           type: string
-          example: Fifa game description
+          example: Task description
         userId:
           type: integer
-    NewGame:
+    NewTask:
       required:
-      - name
+      - title
+      - description
       - userId
       type: object
       properties:
-        name:
+        title:
           type: string
-          example: Fifa
+          example: Study Http
         description:
           type: string
-          example: Fifa game description
+          example: Task description
         userId:
           type: integer
     NewUser:
@@ -277,6 +281,17 @@ components:
     InvalidRequest:
       type: object
       properties:
-        cause:
+        error:
           type: string
           example: "Missing required parameter"
+    NewTaskCreated:
+      required:
+      - status
+      - task
+      type: object
+      properties:
+        status:
+          type: string
+          example: Task with id 123 created with success
+        task:
+          $ref: '#/components/schemas/Task'
