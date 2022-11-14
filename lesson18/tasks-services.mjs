@@ -2,6 +2,7 @@
 
 import * as tasksData from './tasks-data.mjs'
 import * as usersData from './users-data.mjs'
+import errors from './errors.mjs'
 
 
 export async function getTasks(userToken) {
@@ -23,16 +24,17 @@ export async function deleteTask(taskId) {
 export async function createTask(taskToCreate) {
     // Validate new task properties
     if(!isAString(taskToCreate.title))
-        throw "Invalid Argument"
-    
-
+        throw errors.INVALID_ARGUMENT('title')
     return tasksData.createTask(taskToCreate)
 }
 
-export async function updateTask(taskId, newTask) {
+export async function updateTask(taskId, taskToCreate) {
     // Validate new task properties
+    if(isNaN(Number(taskId))) 
+        throw errors.INVALID_ARGUMENT('taskId')
+
     if(!isAString(taskToCreate.title))
-        throw "Invalid Argument"
+        throw errors.INVALID_ARGUMENT('title')
 
     return tasksData.updateTask(taskId, newTask)
 }

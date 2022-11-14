@@ -5,12 +5,13 @@
 //  - Generate the response
 
 import * as tasksServices from './tasks-services.mjs'
+import toHttpResponse from './response-errors.mjs'
 
 export const getTasks = verifyAuthentication(getTasksInternal)
 export const getTask = verifyAuthentication(getTaskInternal)
 export const deleteTask = verifyAuthentication(deleteTaskInternal)
-export const updateTask = verifyAuthentication(updateTaskInternal )
-export const createTask = verifyAuthentication(createTaskInternal )
+export const updateTask = verifyAuthentication(updateTaskInternal)
+export const createTask = verifyAuthentication(createTaskInternal)
 
 
 async function getTasksInternal(req, rsp) {
@@ -43,9 +44,8 @@ async function createTaskInternal(req, rsp) {
                 })
             
         } catch(e) {
-            rsp
-                .status(400)
-                .json({error: `Error creating task: ${e}`})
+            let ret = toHttpResponse(e)
+            rsp.status(ret.status).json(ret.body)
         }
 }
 
