@@ -2,7 +2,7 @@
 // Handle HTTP request means:
 //  - Obtain data from requests. Request data can be obtained from: URI(path, query, fragment), headers, body
 //  - Invoke the corresponding operation on services
-//  - Generate the response
+//  - Generate the response in JSON format
 
 import toHttpResponse from './response-errors.mjs'
 
