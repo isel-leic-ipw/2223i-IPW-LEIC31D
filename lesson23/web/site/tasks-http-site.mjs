@@ -5,6 +5,7 @@
 //  - Generate the response in HTML format
 
 import url from 'url'
+import toHttpResponse from '../api/response-errors.mjs'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
@@ -14,19 +15,59 @@ export default function (tasksServices) {
     return {
         getHome: getHome,
         getCss: getCss,
+        getCss: getCss,
+        getTask: handleRequest(getTask),
+        getTasks: handleRequest(getTasks),
+        getNewTask: getNewTask,
     
     }
 
     async function getHome(req, rsp) {
-      const htmlFileLocation = __dirname + 'public/index.html'
-        console.log(htmlFileLocation)
-        rsp.sendFile(htmlFileLocation)
+      sendFile('index.html', rsp)
     }
 
     async function getCss(req, rsp) {
-      const htmlFileLocation = __dirname + 'public/site.css'
-        rsp.sendFile(htmlFileLocation)
+      sendFile('site.css', rsp)
+    }
+
+    async function getTasks(req, rsp) {
+      const tasks = await tasksServices.getTasks(req.token, req.query.q, req.query.skip, req.query.limit)
+      return { name: 'tasks', data: { title: 'All tasks', tasks: tasks} }  
+    }
+
+    async function getTask(req, rsp) {
+      const taskId = req.params.id
+      const task = await tasksServices.getTask(req.token, taskId)
+      return { name: 'task', data: task } 
     }
     
+    async function getNewTask(req, rsp) {
+      rsp.render('newTask') 
+    }
+
+    function sendFile(fileName, rsp) {
+      const fileLocation = __dirname + 'public/' + fileName
+      rsp.sendFile(fileLocation)
+    }
+
+
+    function handleRequest(handler) {
+      // TODO: While we do not have authentication in site interface, 
+      // let's hardcode a token for one user 
+      const HAMMER_TOKEN = 'ef604e80-a351-4d13-b78f-c888f3e63b61'
+      return async function(req, rsp) {
+          req.token = HAMMER_TOKEN
+          try {
+              let view = await handler(req, rsp)
+              rsp.render(view.name , view.data)
+          } catch(e) {
+              // TODO: Hammer time again. We are in an HTML response format
+              // returning errors in Json format
+              const response = toHttpResponse(e)
+              rsp.status(response.status).json(response.body)
+              console.log(e)
+          }
+      }
+  }
 }
 
