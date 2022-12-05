@@ -1,0 +1,362 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Jokes API",
+    "description": "This is a simple Jokes API",
+    "contact": {
+      "email": "you@your-company.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "jokes"
+    },
+    {
+      "name": "users"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "adds a user",
+        "description": "Adds a user to the system",
+        "operationId": "addUser",
+        "requestBody": {
+          "description": "User to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewUser"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "description": "user created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "token"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input, object invalid",
+            "content": {}
+          }
+        },
+        "x-codegen-request-body-name": "user"
+      }
+    },
+    "/api/jokes": {
+      "get": {
+        "tags": [
+          "jokes"
+        ],
+        "summary": "get jokes",
+        "description": "By passing in the appropriate options, you can search for available jokes",
+        "operationId": "getJokes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "searchString",
+            "in": "query",
+            "description": "pass an optional search string for looking up jokes with that text",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "description": "number of records to skip for pagination",
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of records to return",
+            "schema": {
+              "maximum": 50,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "search results matching criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Joke"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "content": {}
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "jokes"
+        ],
+        "summary": "adds a joke",
+        "description": "Adds a joke to the system",
+        "operationId": "addJoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Joke to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewJoke"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "description": "Joke created",
+            "content": {}
+          },
+          "400": {
+            "description": "Invalid input, object invalid",
+            "content": {}
+          }
+        },
+        "x-codegen-request-body-name": "joke"
+      }
+    },
+    "/api/jokes/{jokeId}": {
+      "get": {
+        "tags": [
+          "jokes"
+        ],
+        "summary": "Get a joke given its id",
+        "description": "Get a joke given its id",
+        "operationId": "getJokeById",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "jokeId",
+            "in": "path",
+            "description": "ID of joke that to be fetched",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Joke"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied",
+            "content": {}
+          },
+          "404": {
+            "description": "Joke not found",
+            "content": {}
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "jokes"
+        ],
+        "summary": "updates a joke",
+        "description": "Updates a Joke in the system",
+        "operationId": "updateJoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "jokeId",
+            "in": "path",
+            "description": "ID of the joke to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Joke to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Joke"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "description": "joke updated",
+            "content": {}
+          },
+          "404": {
+            "description": "Joke not found",
+            "content": {}
+          }
+        },
+        "x-codegen-request-body-name": "joke"
+      },
+      "delete": {
+        "tags": [
+          "jokes"
+        ],
+        "summary": "Delete a joke by ID",
+        "description": "Delete a joke by ID",
+        "operationId": "deleteJoke",
+        "parameters": [
+          {
+            "name": "jokeId",
+            "in": "path",
+            "description": "ID of the joke to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied",
+            "content": {}
+          },
+          "404": {
+            "description": "Joke not found",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Joke": {
+        "required": [
+          "id",
+          "text",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "text": {
+            "type": "string",
+            "example": "study PI"
+          },
+          "userId": {
+            "type": "integer"
+          }
+        }
+      },
+      "NewJoke": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "example": "study PI"
+          }
+        }
+      },
+      "NewUser": {
+        "required": [
+          "userName"
+        ],
+        "type": "object",
+        "properties": {
+          "userName": {
+            "type": "string",
+            "example": "joao"
+          }
+        }
+      }
+    }
+  }
+}
