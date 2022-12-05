@@ -18,6 +18,7 @@ export default function (tasksServices) {
         getCss: getCss,
         getTask: handleRequest(getTask),
         getTasks: handleRequest(getTasks),
+        createTask: handleRequest(createTask),
         getNewTask: getNewTask,
     
     }
@@ -45,6 +46,13 @@ export default function (tasksServices) {
       rsp.render('newTask') 
     }
 
+    async function createTask(req, rsp) {
+      console.log(req.body)
+      let newTask = await tasksServices.createTask(req.token, req.body)
+      rsp.redirect('/tasks')
+    }
+    
+
     function sendFile(fileName, rsp) {
       const fileLocation = __dirname + 'public/' + fileName
       rsp.sendFile(fileLocation)
@@ -59,7 +67,9 @@ export default function (tasksServices) {
           req.token = HAMMER_TOKEN
           try {
               let view = await handler(req, rsp)
-              rsp.render(view.name , view.data)
+              if(view) {
+                rsp.render(view.name , view.data)
+              }
           } catch(e) {
               // TODO: Hammer time again. We are in an HTML response format
               // returning errors in Json format
