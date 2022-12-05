@@ -5,6 +5,7 @@
 //  - Generate the response in HTML format
 
 import url from 'url'
+import { deleteTask, updateTask } from '../../data/tasks-data-mem.mjs';
 import toHttpResponse from '../api/response-errors.mjs'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -19,6 +20,8 @@ export default function (tasksServices) {
         getTask: handleRequest(getTask),
         getTasks: handleRequest(getTasks),
         createTask: handleRequest(createTask),
+        deleteTask: handleRequest(deleteTask),
+        updateTask: handleRequest(updateTask),
         getNewTask: getNewTask,
     
     }
@@ -50,6 +53,16 @@ export default function (tasksServices) {
       console.log(req.body)
       let newTask = await tasksServices.createTask(req.token, req.body)
       rsp.redirect('/tasks')
+    }
+
+    async function deleteTask(req, rsp) {
+      const taskId = req.params.id
+      const task = await tasksServices.deleteTask(req.token, taskId)
+      rsp.redirect('/tasks')
+    }
+
+    async function updateTask(req, rsp) {
+
     }
     
 

@@ -47,6 +47,8 @@ app.set('views', path.join(__dirname, 'web', 'site', 'views'));
 app.get('/home', tasksSite.getHome)
 app.get('/tasks/newTask', tasksSite.getNewTask)
 app.get('/tasks/:id', tasksSite.getTask)
+app.post('/tasks/:id/delete', tasksSite.deleteTask)
+app.post('/tasks/:id/update', tasksSite.updateTask)
 app.get('/tasks', tasksSite.getTasks)
 app.post('/tasks', tasksSite.createTask)
 app.get('/site.css', tasksSite.getCss)
