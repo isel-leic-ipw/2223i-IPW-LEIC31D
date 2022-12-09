@@ -41,8 +41,9 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'web', 'site', 'views'));
-//hbs.registerPartials(__dirname + '/views/partials');
+//hbs.registerPartials(__dirname + '/views/partials')
 
+app.use(cookieMw)
 
 app.get('/home', tasksSite.getHome)
 app.get('/tasks/newTask', tasksSite.getNewTask)
@@ -52,6 +53,7 @@ app.post('/tasks/:id/update', tasksSite.updateTask)
 app.get('/tasks', tasksSite.getTasks)
 app.post('/tasks', tasksSite.createTask)
 app.get('/site.css', tasksSite.getCss)
+app.get('/showTracking', tasksSite.showTracking)
 
 app.get('/api/tasks', tasksApi.getTasks)
 app.get('/api/tasks/:id', tasksApi.getTask)
@@ -65,3 +67,21 @@ console.log("End setting up server")
 
 // Route handling functions
 
+const TRACKING_COOKIE_NAME = "TasksSiteTrackingCookie"
+//const COUNT_COOKIE_NAME = "TasksSiteCookie"
+
+function cookieMw(req, rsp, next) {
+    const COOKIE_COUNTER = "taskAppCookieCounter"
+
+    let cookies = req.get("Cookie")
+    let counterCookie = 0
+    if(cookies) {
+        let cookie =  cookies.split(";").find(c => c.includes(COOKIE_COUNTER))
+        if(cookie) {
+            counterCookie = Number(cookie.split("=")[1])+1
+        }
+
+    }
+    rsp.cookie(COOKIE_COUNTER, counterCookie)
+    next()
+}

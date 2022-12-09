@@ -23,6 +23,7 @@ export default function (tasksServices) {
         deleteTask: handleRequest(deleteTask),
         updateTask: handleRequest(updateTask),
         getNewTask: getNewTask,
+        showTracking: showTracking,
     
     }
 
@@ -63,6 +64,15 @@ export default function (tasksServices) {
 
     async function updateTask(req, rsp) {
 
+    }
+
+    async function showTracking(req, rsp) {
+      let cookies = req.get("Cookie")
+      cookies = decodeURIComponent(cookies)
+      console.log("##############")
+      console.log(cookies)
+      cookies = cookies.split(";")
+      rsp.render("showTracking", { cookies })
     }
     
 
