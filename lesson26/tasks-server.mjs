@@ -19,6 +19,11 @@ import cors from 'cors'
 import hbs from 'hbs'
 import url from 'url'
 import path from 'path'
+import cookieParser from 'cookie-parser'
+//import session from './my-session.mjs'
+import session from 'express-session'
+import fileStore from 'session-file-store'
+
 
 const tasksServices = tasksServicesInit(tasksData, usersData)
 const tasksApi = tasksApiInit(tasksServices)
@@ -35,6 +40,17 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 app.use(express.json())
 app.use(express.urlencoded())
+app.use(cookieParser())
+
+const FileStore = fileStore(session)
+app.use(session({
+    secret: "Portugal campeão de mundo",
+    store: new FileStore()
+}
+
+))
+
+
 
 // view engine setup
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -43,7 +59,7 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'web', 'site', 'views'));
 //hbs.registerPartials(__dirname + '/views/partials')
 
-app.use(cookieMw)
+app.use(cookieMwSession)
 
 app.get('/home', tasksSite.getHome)
 app.get('/tasks/newTask', tasksSite.getNewTask)
@@ -67,21 +83,30 @@ console.log("End setting up server")
 
 // Route handling functions
 
-const TRACKING_COOKIE_NAME = "TasksSiteTrackingCookie"
-//const COUNT_COOKIE_NAME = "TasksSiteCookie"
 
-function cookieMw(req, rsp, next) {
+function cookieMwCookies(req, rsp, next) {
     const COOKIE_COUNTER = "taskAppCookieCounter"
-
-    let cookies = req.get("Cookie")
-    let counterCookie = 0
-    if(cookies) {
-        let cookie =  cookies.split(";").find(c => c.includes(COOKIE_COUNTER))
-        if(cookie) {
-            counterCookie = Number(cookie.split("=")[1])+1
-        }
-
+    console.log("#####", req.cookies)
+    let count = Number(req.cookies[COOKIE_COUNTER])
+    console.log(count)
+    if(isNaN(count)) {
+        count = 0
     }
-    rsp.cookie(COOKIE_COUNTER, counterCookie)
+    
+    count += 1
+
+    rsp.cookie(COOKIE_COUNTER, count)
+    next()
+}
+
+function cookieMwSession(req, rsp, next) {
+    let count = req.session.count
+
+    if(count == undefined) {
+        req.session.count = 0
+    }
+    ++req.session.count
+    console.log(req.session.count)
+    
     next()
 }
