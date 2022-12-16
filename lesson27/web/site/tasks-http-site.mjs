@@ -24,6 +24,7 @@ export default function (tasksServices) {
         updateTask: handleRequest(updateTask),
         getNewTask: getNewTask,
         showTracking: showTracking,
+        validateLogin: validateLogin,
     
     }
 
@@ -63,6 +64,16 @@ export default function (tasksServices) {
     }
 
     async function updateTask(req, rsp) {
+
+    }
+
+    async function validateLogin(req, rsp) {
+      const username = req.body.username
+      const pass = req.body.password
+
+      const user = await tasksServices.getUser(username, pas)
+
+      req.login({username: user.name, token: user.token}, () => rsp.redirect('/tasks'))
 
     }
 

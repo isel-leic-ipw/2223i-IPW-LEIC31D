@@ -39,13 +39,15 @@ app.use(cors())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.urlencoded( { extended: false}))
 app.use(cookieParser())
 
 const FileStore = fileStore(session)
 app.use(session({
-    secret: "Portugal campeão de mundo",
-    store: new FileStore()
+    secret: "Benfica campeão 2022/2023?!",
+    resave: false,
+    saveUninitialized: false,
+    //store: new FileStore()
 }
 
 ))
@@ -61,7 +63,10 @@ app.set('views', path.join(__dirname, 'web', 'site', 'views'));
 
 app.use(cookieMwSession)
 
+// Public routes
 app.get('/home', tasksSite.getHome)
+
+// Authenticated routes
 app.get('/tasks/newTask', tasksSite.getNewTask)
 app.get('/tasks/:id', tasksSite.getTask)
 app.post('/tasks/:id/delete', tasksSite.deleteTask)
@@ -70,6 +75,8 @@ app.get('/tasks', tasksSite.getTasks)
 app.post('/tasks', tasksSite.createTask)
 app.get('/site.css', tasksSite.getCss)
 app.get('/showTracking', tasksSite.showTracking)
+
+
 
 app.get('/api/tasks', tasksApi.getTasks)
 app.get('/api/tasks/:id', tasksApi.getTask)
