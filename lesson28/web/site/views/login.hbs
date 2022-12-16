@@ -1,0 +1,21 @@
+
+<h1>Login</h1>
+<form method="POST" action="/login">
+    <p>
+    Username: <input type="text" name="username" value="{{username}}">
+    </p>
+
+    <p>
+    Password: <input type="password" name="password">
+    </p>
+
+    <input type="submit">
+    {{#if message}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+    {{/if}}
+</form>

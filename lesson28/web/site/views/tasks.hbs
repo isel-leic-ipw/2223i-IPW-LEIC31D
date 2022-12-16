@@ -1,0 +1,13 @@
+<h1>{{title}}</h1>
+Create a <a href="./tasks/newTask">new task</a>
+<ul>
+  {{#each tasks}}
+    <li>
+      <h2><a href="./tasks/{{id}}">{{title}}</a></h2>
+      <p>{{description}}</p>
+      <form action="/tasks/{{id}}/delete" method="POST">
+        <input type="submit" value="Delete task" />
+      </form>
+    </li>
+  {{/each}}
+</ul>
