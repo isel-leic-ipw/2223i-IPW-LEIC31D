@@ -76,8 +76,6 @@ app.post('/tasks', tasksSite.createTask)
 app.get('/site.css', tasksSite.getCss)
 app.get('/showTracking', tasksSite.showTracking)
 
-
-
 app.get('/api/tasks', tasksApi.getTasks)
 app.get('/api/tasks/:id', tasksApi.getTask)
 app.delete('/api/tasks/:id', tasksApi.deleteTask)

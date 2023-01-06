@@ -44,7 +44,7 @@ export default function (tasksServices) {
     async function getTask(req, rsp) {
       const taskId = req.params.id
       const task = await tasksServices.getTask(req.token, taskId)
-      return { name: 'task', data: task } 
+      return { name: 'task', data: {task: task, token: req.token } }
     }
     
     async function getNewTask(req, rsp) {
